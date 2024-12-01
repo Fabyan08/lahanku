@@ -174,11 +174,13 @@ def show_profile(level, user_id):  # Add the 'level' argument here
             users = list(csv.reader(file))
 
         # Mencari pengguna berdasarkan user_id
-        user = next((u for u in users if u[0] == user_id), None)
+        user_index = next((i for i, u in enumerate(users) if u[0] == user_id), None)
 
-        if not user:
+        if user_index is None:
             print("Pengguna tidak ditemukan.")
             return
+
+        user = users[user_index]  # Ambil data pengguna berdasarkan indeks
 
         # Menampilkan data profil pengguna
         print("\n=== Profil Pengguna ===")
@@ -189,8 +191,6 @@ def show_profile(level, user_id):  # Add the 'level' argument here
         print(f"Nomor HP: {user[5]}")
         print(f"Alamat: {user[6]}")
         print("=" * 30)
-
-        
 
         # Memberikan opsi untuk mengubah profil
         print("Pilih data yang ingin diubah:")
@@ -208,23 +208,23 @@ def show_profile(level, user_id):  # Add the 'level' argument here
 
         if pilihan == '1':
             new_name = input("Masukkan nama baru: ")
-            user[1] = new_name
+            users[user_index][1] = new_name
             print(f"Nama berhasil diubah menjadi {new_name}")
         elif pilihan == '2':
             new_email = input("Masukkan email baru: ")
-            user[2] = new_email
+            users[user_index][2] = new_email
             print(f"Email berhasil diubah menjadi {new_email}")
         elif pilihan == '3':
             new_ktp = input("Masukkan nomor KTP baru: ")
-            user[4] = new_ktp
+            users[user_index][4] = new_ktp
             print(f"Nomor KTP berhasil diubah menjadi {new_ktp}")
         elif pilihan == '4':
             new_phone = input("Masukkan nomor HP baru: ")
-            user[5] = new_phone
+            users[user_index][5] = new_phone
             print(f"Nomor HP berhasil diubah menjadi {new_phone}")
         elif pilihan == '5':
             new_address = input("Masukkan alamat baru: ")
-            user[6] = new_address
+            users[user_index][6] = new_address
             print(f"Alamat berhasil diubah menjadi {new_address}")
         elif pilihan == '0':
             show_menu(level, user_id)  # Kembali ke menu utama
@@ -235,16 +235,18 @@ def show_profile(level, user_id):  # Add the 'level' argument here
         else:
             print("Pilihan tidak valid. Kembali ke menu utama.")
             show_menu(level, user_id)  # Kembali ke menu utama
+            return
 
         # Menyimpan perubahan ke file CSV
         with open('users.csv', 'w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerows(users)
-            show_menu(level, user_id)  # Kembali ke menu utama
-            # return
+            writer.writerows(users)  # Tulis ulang semua data dengan update
+
+        show_menu(level, user_id)  # Kembali ke menu utama
 
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
+
 
 # PENGGUNA
 
@@ -713,6 +715,7 @@ def hapus_lahan(user_id, lahan_data):
     input("\nTekan Enter untuk kembali.")
     lihat_lahan(user_id)
 
+# CHECKING SAMPAI SINI==========
 def list_penyewa(user_id):
     print("\n=== List Penyewa ===")
     try:
@@ -728,7 +731,15 @@ def list_penyewa(user_id):
                 return
             
             # Ambil data penyewaan terkait berdasarkan ID Lahan
-            sewa_terkait = [sewa for sewa in sewa_reader if any(sewa[2] == lahan[0] for lahan in lahan_pemilik)]
+            # sewa_terkait = [sewa for sewa in sewa_reader if any(sewa[2] == lahan[0] for lahan in lahan_pemilik)]
+            
+            sewa_terkait = []
+            for sewa in sewa_reader:
+                for lahan in lahan_pemilik:
+                    if sewa[2] == lahan[0]:  # Cek kecocokan ID Lahan
+                        sewa_terkait.append(sewa)  # Tambahkan ke daftar sewa_terkait
+                        break  # Berhenti cek untuk lahan ini karena sudah cocok
+
             if not sewa_terkait:
                 print("Belum ada penyewa untuk lahan Anda.")
                 return
@@ -739,16 +750,10 @@ def list_penyewa(user_id):
             
             for i, sewa in enumerate(sewa_terkait, start=1):
                 # Cari lahan berdasarkan ID Lahan
-                lahan = next((l for l in lahan_pemilik if l[0] == sewa[2]), None)
-                if not lahan:
-                    print(f"ID Lahan {sewa[2]} tidak ditemukan.")
-                    continue  # Lewati jika lahan tidak ditemukan
+                lahan = next((l for l in lahan_pemilik if l[0] == sewa[2]), None) # Cari berdasarkan ID Lahan
                 
                 # Cari pengguna berdasarkan ID Pengguna
                 penyewa = next((u for u in users_reader if u[0] == sewa[1]), None)  # Cari berdasarkan ID Pengguna
-                if not penyewa:
-                    print(f"ID Pengguna {sewa[1]} tidak ditemukan.")
-                    continue  # Lewati jika pengguna tidak ditemukan
                 
                 penyewa_dict[str(i)] = (sewa, lahan, penyewa)
                 print(f"{i:<5} {lahan[0]:<10} {lahan[2]:<20} {penyewa[1]:<20} {sewa[7]:<15}")
@@ -760,6 +765,7 @@ def list_penyewa(user_id):
                 detail_penyewa(penyewa_dict[pilihan], user_id)
             else:
                 print("Nomor tidak valid.")
+                
     except FileNotFoundError as e:
         print(f"File tidak ditemukan: {e}")
 
@@ -774,34 +780,22 @@ def detail_penyewa(data, user_id):
     print(f"Luas yang Disewa: {sewa[2]} hektar")
     print(f"Tanggal Sewa: {sewa[4]}")
     print(f"Tanggal Berakhir: {sewa[3]}")
-    print(f"Total Harga: Rp {float(sewa[6]):,.2f}")  # Changed from sewa[6] to sewa[5]
+    print(f"Total Harga: Rp {float(sewa[6]):,.2f}") 
     print(f"Status: {sewa[7]}")
 
-    if sewa[7].lower() == "Belum Berjalan":
-        # Jika status sudah "Belum Berjalan", tanyakan apakah ingin menghapus data
-        konfirmasi = input("\nStatus sudah 'Belum Berjalan'. Apakah Anda ingin menghapus data ini? (y/n): ").lower()
-        if konfirmasi == 'y':
-            hapus_data_sewa(sewa)
-            print("Data sewa berhasil dihapus.")
-        else:
-            print("Data sewa tidak dihapus.")
-    elif sewa[7].lower() == "Selesai":
-        # Jika status sudah "Selesai", kembali ke menu List Penyewa
-        input("\nStatus sudah 'Selesai'. Tekan Enter untuk kembali ke List Penyewa.")
-    else:
-        # Jika status belum "Belum Berjalan", tanyakan apakah ingin menyetujui perjanjian
+    if sewa[7] == "Belum Perjanjian":
         konfirmasi = input("\nApakah Anda ingin menyetujui perjanjian ini? (y/n): ").lower()
         if konfirmasi == 'y':
             update_status_sewa(sewa)
             print("Perjanjian berhasil disetujui. Status diperbarui menjadi 'Belum Berjalan'.")
         else:
             print("Perjanjian tidak disetujui.")
+    else:
+        input(f"\nStatus sudah {sewa[7]} dan tidak dapat diubah. Tekan Enter untuk kembali ke List Penyewa.")
 
     # Setelah selesai melihat detail, kembali ke List Penyewa
     list_penyewa(user_id)
 
-def hapus_data_sewa(sewa):
-    print(f"Data sewa dengan ID {sewa[0]} telah dihapus.")
 
 def update_status_sewa(sewa):
     # Baca semua data sewa
@@ -830,13 +824,11 @@ def rekap_penyewaan(user_id):
 
             # Membuat mapping untuk user dan lahan
             user_map = {row[0]: row[1] for row in user_reader if len(row) >= 2}  # id_user -> nama_user
-            lahan_map = {
-                row[0]: {"lokasi": row[2], "id_pemilik": row[1]} for row in lahan_reader if len(row) >= 3
-            }  # id_lahan -> {lokasi, id_pemilik}
+            lahan_map = {row[0]: {"lokasi": row[2], "id_pemilik": row[1]} for row in lahan_reader if len(row) >= 2}  # id_lahan -> {lokasi, id_pemilik}
 
             print("\n=== List Penyewa ===")
             print(f"{'No':<5} {'ID Lahan':<10} {'Lokasi':<20} {'Nama Penyewa':<20} {'Nama Pemilik':<20} {'Status':<15}")
-            print("=" * 80)
+            print("=" * 100)
 
             # Menampilkan data penyewaan
             sewa_list = [row for row in sewa_reader if len(row) >= 8]  # Pastikan ada minimal 8 kolom sesuai format baru
@@ -846,7 +838,7 @@ def rekap_penyewaan(user_id):
                 show_menu("admin", user_id)
                 return
 
-            for i, sewa in enumerate(sewa_list):
+            for i, sewa in enumerate(sewa_list, start=1):
                 id_lahan = sewa[2]  # Menggunakan ID Lahan yang ada pada kolom 3
                 id_penyewa = sewa[1]  # Menggunakan ID Pengguna yang ada pada kolom 2
                 lokasi_lahan = lahan_map.get(id_lahan, {}).get("lokasi", "Unknown")
@@ -856,7 +848,7 @@ def rekap_penyewaan(user_id):
                 status = sewa[7]  # Status pada kolom 8
 
                 print(
-                    f"{i+1:<5} {id_lahan:<10} {lokasi_lahan:<20} {nama_penyewa:<20} {nama_pemilik:<20} {status:<15}"
+                    f"{i:<5} {id_lahan:<10} {lokasi_lahan:<20} {nama_penyewa:<20} {nama_pemilik:<20} {status:<15}"
                 )
 
             # Meminta input untuk detail
@@ -887,9 +879,20 @@ def tampilkan_detail(sewa, user_map, lahan_map):
         id_lahan = sewa[2]  # ID Lahan (kolom 3)
         tanggal_mulai = sewa[3]  # Tanggal Mulai (kolom 4)
         tanggal_selesai = sewa[4]  # Tanggal Selesai (kolom 5)
-        durasi = sewa[5]  # Durasi (kolom 6)
+        durasi_bulan = int(float(sewa[5]))  # Durasi (kolom 6)
         total_biaya = sewa[6]  # Total Biaya (kolom 7)
         status = sewa[7]  # Status (kolom 8)
+        
+        # Menghitung durasi dalam tahun dan bulan
+        if durasi_bulan < 12:
+            durasi = f"{durasi_bulan} bulan"
+        else:
+            tahun = durasi_bulan // 12
+            bulan = durasi_bulan % 12
+            if bulan == 0:
+                durasi = f"{tahun} tahun"
+            else:
+                durasi = f"{tahun} tahun {bulan} bulan"
 
         # Mengambil data lokasi dan pemilik lahan
         lokasi_lahan = lahan_map.get(id_lahan, {}).get("lokasi", "Unknown")
@@ -909,8 +912,8 @@ def tampilkan_detail(sewa, user_map, lahan_map):
         print(f"Nama Pemilik   : {nama_pemilik}")
         print(f"Tanggal Mulai  : {tanggal_mulai}")
         print(f"Tanggal Selesai: {tanggal_selesai}")
-        print(f"Durasi         : {durasi} tahun")
-        print(f"Total Biaya    : Rp {float(total_biaya):,.0f}")
+        print(f"Durasi         : {durasi}")
+        print(f"Total Biaya    : Rp {float(total_biaya):,.2f}")
         print(f"Status         : {status}")
         print("=" * 30)
 
@@ -925,7 +928,7 @@ def rekap_jumlah_pengguna(user_id):
             sewa_reader = csv.reader(sewa_file)
 
             # Membaca data pengguna dan memfilter berdasarkan level 'pengguna'
-            users = [row for row in user_reader if len(row) >= 2 and row[-1] == 'pengguna']  # Pastikan level adalah 'pengguna'
+            users = [row for row in user_reader if len(row) >= 2 and row[7] == 'pengguna']  # Pastikan level adalah 'pengguna'
             if not users:
                 print("Tidak ada data pengguna dengan level 'pengguna'.")
                 return  
@@ -941,11 +944,11 @@ def rekap_jumlah_pengguna(user_id):
             print(f"{'No':<5} {'ID Pengguna':<15} {'Nama Pengguna':<20} {'Status':<20}")
             print("=" * 60)
 
-            for i, user in enumerate(users):
+            for i, user in enumerate(users, start=1):
                 id_user = user[0]
                 nama_user = user[1]
                 status = "Menyewa" if id_user in pengguna_menyewa else "Belum Menyewa"
-                print(f"{i+1:<5} {id_user:<15} {nama_user:<20} {status:<20}")
+                print(f"{i:<5} {id_user:<15} {nama_user:<20} {status:<20}")
 
             input("\nTekan Enter untuk kembali.")
             show_menu("admin", user_id)
