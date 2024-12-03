@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from fpdf import FPDF
 import re  # Untuk validasi email
 
+# MUTTAQIN =============================
 # Fungsi untuk mendapatkan ID berikutnya
 def id_berikutnya(filename):
     try:
@@ -106,8 +107,6 @@ def login():
     print("Email atau password salah. Coba lagi.")
     main_menu()
 
-
-
 # Menu sesuai level
 def show_menu(level, user_id):
     print("\n=== Menu Utama ===")
@@ -136,7 +135,7 @@ def show_menu(level, user_id):
         if pilihan == '0':
             show_profile(level, user_id)  # Tampilkan menu Profil
         elif pilihan == '1':
-            crud_lahan(user_id)
+            data_lahan(user_id)
         elif pilihan == '2':
             list_penyewa(user_id)  # Panggil fungsi baru untuk fitur List Penyewa
         else:
@@ -164,9 +163,7 @@ def show_menu(level, user_id):
         print("Level akses tidak dikenali.")
         return
 
-
 # SEMUA HAK AKSES
-
 def show_profile(level, user_id):  # Add the 'level' argument here
     try:
         # Membaca file pengguna
@@ -247,9 +244,11 @@ def show_profile(level, user_id):  # Add the 'level' argument here
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
+# MUTTAQIN ===========================
 
 # PENGGUNA
 
+# SHINTA ==========================
 def sewa_lahan(user_id):
     print("\n=== Sewa Lahan ===")
     tanaman_cari = input("Masukkan tanaman yang ingin Anda tanam: ").lower()
@@ -411,17 +410,6 @@ def tambah_sewa(user_id, lahan, tanggal_sewa, tanggal_berakhir, luas_sewa, total
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
-
-def get_username(user_id):
-    # Fungsi sederhana untuk mendapatkan nama pengguna dari file users.csv
-    with open("users.csv", mode="r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if len(row) > 0 and row[0] == str(user_id):
-                return row[1]  # Nama pengguna
-    return "Unknown"
-
-
 def data_perjanjian(user_id):
     print("\n=== Data Perjanjian ===")
     print(f"{'No':<5} {'Lokasi':<30} {'Tanggal Sewa':<15} {'Tanggal Berakhir':<15} {'Status':<20}  {'ID Lahan':<10}")
@@ -482,6 +470,15 @@ def data_perjanjian(user_id):
     input("\nTekan Enter untuk kembali.")
     show_menu("pengguna", user_id)
 
+def get_username(user_id):
+    # Fungsi sederhana untuk mendapatkan nama pengguna dari file users.csv
+    with open("users.csv", mode="r") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) > 0 and row[0] == str(user_id):
+                return row[1]  # Nama pengguna
+    return "Unknown"
+
 def buat_surat_perjanjian(data, user_id):
     # Fungsi untuk membuat surat perjanjian.
 
@@ -526,7 +523,9 @@ def buat_surat_perjanjian(data, user_id):
     pdf.output(file_name)
     print(f"Surat perjanjian disimpan sebagai {file_name}.")
 
-    
+# SHINTA ============================
+
+# NEVA ================================
 
 def lihat_history(user_id):
     try:
@@ -624,7 +623,7 @@ def lihat_history(user_id):
 # PEMILIK LAHAN =========
 
 # Fungsi CRUD untuk lahan
-def crud_lahan(user_id):
+def data_lahan(user_id):
     print("\n=== Data Lahan ===")
     print("[1] Tambah Lahan")
     print("[2] Lihat Semua Lahan")
@@ -639,7 +638,7 @@ def crud_lahan(user_id):
         show_menu("pemilik_lahan", user_id)
     else:
         print("Pilihan tidak valid. Silakan coba lagi.")
-        crud_lahan(user_id)
+        data_lahan(user_id)
 
 def tambah_lahan(user_id):
     print("\n=== Tambah Lahan ===")
@@ -656,7 +655,7 @@ def tambah_lahan(user_id):
         writer.writerow([lahan_id, user_id, lokasi, tanaman, deskripsi, luas, harga_per_hektar])
     
     print("Lahan berhasil ditambahkan!")
-    crud_lahan(user_id)
+    data_lahan(user_id)
 
 def lihat_lahan(user_id):
     print("\n=== Daftar Lahan ===")
@@ -678,7 +677,7 @@ def lihat_lahan(user_id):
     if not lahan_ada:
         print("Tidak ada data lahan milik Anda.")
         input("\nTekan Enter untuk kembali.")
-        crud_lahan(user_id)
+        data_lahan(user_id)
         return
 
     print("\n[1] Hapus Lahan")
@@ -687,7 +686,7 @@ def lihat_lahan(user_id):
     if pilihan == '1':
         hapus_lahan(user_id, lahan_data)
     elif pilihan == '0':
-        crud_lahan(user_id)
+        data_lahan(user_id)
     else:
         print("Pilihan tidak valid.")
         lihat_lahan(user_id)
@@ -769,6 +768,11 @@ def list_penyewa(user_id):
     except FileNotFoundError as e:
         print(f"File tidak ditemukan: {e}")
 
+# NEVA ==================================
+
+
+# FABYAN =================================
+
 def detail_penyewa(data, user_id):
     sewa, lahan, penyewa = data
     print("\n=== Detail Penyewa ===")
@@ -796,7 +800,6 @@ def detail_penyewa(data, user_id):
     # Setelah selesai melihat detail, kembali ke List Penyewa
     list_penyewa(user_id)
 
-
 def update_status_sewa(sewa):
     # Baca semua data sewa
     with open("sewa.csv", mode="r") as file:
@@ -811,7 +814,6 @@ def update_status_sewa(sewa):
     with open("sewa.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(rows)
-
 
 # ADMIN =================
 def rekap_penyewaan(user_id):
@@ -954,6 +956,8 @@ def rekap_jumlah_pengguna(user_id):
             show_menu("admin", user_id)
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
+
+# FABYAN ===============================
 
 # Jalankan program
 main_menu()
