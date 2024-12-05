@@ -3,6 +3,7 @@ import hashlib
 from datetime import datetime, timedelta
 from fpdf import FPDF
 import re  # Untuk validasi email
+import pandas as pd
 
 # MUTTAQIN =============================
 # Fungsi untuk mendapatkan ID berikutnya
@@ -33,9 +34,56 @@ def main_menu():
         main_menu()
 
 # Fungsi registrasi
+# def register():
+#     print("=== Registrasi ===")
+#     user_id = id_berikutnya("users.csv")  # Ambil ID berikutnya
+#     nama = input("Masukkan Nama: ")
+#     email = input("Masukkan Email: ")
+#     password = input("Masukkan Password: ")
+#     ktp = input("Masukkan No KTP: ")
+#     nomor_hp = input("Masukkan Nomor HP: ")
+#     alamat = input("Masukkan Alamat: ")
+    
+#     print("Pilih jenis akun:")
+#     print("[1] Pengguna")
+#     print("[2] Pemilik Lahan")
+#     pilihan_level = input("Pilih (1/2): ")
+    
+#     if pilihan_level == '1':
+#         level = "pengguna"
+#     elif pilihan_level == '2':
+#         level = "pemilik_lahan"
+#     else:
+#         print("Pilihan tidak valid. Silakan coba lagi.")
+#         register()
+#         return
+    
+#     # Enkripsi password
+#     password = hashlib.sha256(password.encode()).hexdigest()
+    
+#     # Simpan data ke file CSV
+#     with open("users.csv", mode="a", newline='') as file:
+#         writer = csv.writer(file)
+#         writer.writerow([user_id, nama, email, password , ktp, nomor_hp, alamat, level])
+    
+#     print("Registrasi berhasil! Silakan login.")
+#     main_menu()
+
 def register():
     print("=== Registrasi ===")
-    user_id = id_berikutnya("users.csv")  # Ambil ID berikutnya
+    
+    try:
+        users_df = pd.read_csv("users.csv", header=None)  # Membaca tanpa header
+        # Menambahkan nama kolom sesuai struktur file
+        users_df.columns = ["user_id", "nama", "email", "password", "ktp", "nomor_hp", "alamat", "level"]
+    except FileNotFoundError:
+        # Jika file tidak ditemukan, buat DataFrame baru
+        users_df = pd.DataFrame(columns=["user_id", "nama", "email", "password", "ktp", "nomor_hp", "alamat", "level"])
+    
+    # Ambil ID berikutnya
+    user_id = 1 if users_df.empty else users_df["user_id"].max() + 1
+
+    # Input data pengguna
     nama = input("Masukkan Nama: ")
     email = input("Masukkan Email: ")
     password = input("Masukkan Password: ")
@@ -60,10 +108,23 @@ def register():
     # Enkripsi password
     password = hashlib.sha256(password.encode()).hexdigest()
     
-    # Simpan data ke file CSV
-    with open("users.csv", mode="a", newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([user_id, nama, email, password , ktp, nomor_hp, alamat, level])
+    # Membuat DataFrame untuk data baru
+    new_user = pd.DataFrame({
+        "user_id": [user_id],
+        "nama": [nama],
+        "email": [email],
+        "password": [password],
+        "ktp": [ktp],
+        "nomor_hp": [nomor_hp],
+        "alamat": [alamat],
+        "level": [level]
+    })
+    
+    # Gabungkan DataFrame baru dengan DataFrame lama
+    users_df = pd.concat([users_df, new_user], ignore_index=True)
+    
+    # Simpan kembali ke file CSV
+    users_df.to_csv("users.csv", index=False, header=False)  # Simpan tanpa header
     
     print("Registrasi berhasil! Silakan login.")
     main_menu()
@@ -90,9 +151,7 @@ def login():
     try:
         with open("users.csv", mode="r") as file:
             reader = csv.reader(file)
-            for row in reader:
-                if len(row) < 8: 
-                    continue
+            for row in reader:             
                 # Memeriksa kecocokan email dan password
                 if row[2] == email and row[3] == password_hash:
                     print(f"Login berhasil! Selamat datang, {row[1]}")
@@ -937,7 +996,7 @@ def rekap_jumlah_pengguna(user_id):
 
             # Membaca data penyewaan
             sewa_list = [row for row in sewa_reader if len(row) >= 2]  # Pastikan ada minimal 2 kolom
-            pengguna_menyewa = {sewa[1] for sewa in sewa_list}  # Set id pengguna yang melakukan penyewaan (kolom 2)
+            pengguna_menyewa = {sewa[1] for sewa in sewa_list}  # Menghasilkan output berupa id pengguna dan menghilangkan duplikat (menggunakan set)
 
             # Menampilkan data rekap
             print("\n=== Rekap Jumlah Pengguna ===")
