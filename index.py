@@ -33,42 +33,6 @@ def main_menu():
         print("Pilihan tidak valid. Silakan coba lagi.")
         main_menu()
 
-# Fungsi registrasi
-# def register():
-#     print("=== Registrasi ===")
-#     user_id = id_berikutnya("users.csv")  # Ambil ID berikutnya
-#     nama = input("Masukkan Nama: ")
-#     email = input("Masukkan Email: ")
-#     password = input("Masukkan Password: ")
-#     ktp = input("Masukkan No KTP: ")
-#     nomor_hp = input("Masukkan Nomor HP: ")
-#     alamat = input("Masukkan Alamat: ")
-    
-#     print("Pilih jenis akun:")
-#     print("[1] Pengguna")
-#     print("[2] Pemilik Lahan")
-#     pilihan_level = input("Pilih (1/2): ")
-    
-#     if pilihan_level == '1':
-#         level = "pengguna"
-#     elif pilihan_level == '2':
-#         level = "pemilik_lahan"
-#     else:
-#         print("Pilihan tidak valid. Silakan coba lagi.")
-#         register()
-#         return
-    
-#     # Enkripsi password
-#     password = hashlib.sha256(password.encode()).hexdigest()
-    
-#     # Simpan data ke file CSV
-#     with open("users.csv", mode="a", newline='') as file:
-#         writer = csv.writer(file)
-#         writer.writerow([user_id, nama, email, password , ktp, nomor_hp, alamat, level])
-    
-#     print("Registrasi berhasil! Silakan login.")
-#     main_menu()
-
 def register():
     print("=== Registrasi ===")
     
