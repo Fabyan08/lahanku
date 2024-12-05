@@ -462,6 +462,7 @@ def data_perjanjian(user_id):
                     
     except FileNotFoundError:
         print("Belum ada data persewaan.")
+        show_menu("pengguna", user_id)
         return
 
     if not data_sewa:
@@ -847,7 +848,7 @@ def rekap_penyewaan(user_id):
             user_reader = csv.reader(user_file)
             lahan_reader = csv.reader(lahan_file)
 
-            # Membuat mapping untuk user dan lahan
+            # Membuat dictionary mapping untuk user dan lahan
             user_map = {row[0]: row[1] for row in user_reader if len(row) >= 2}  # id_user -> nama_user
             lahan_map = {row[0]: {"lokasi": row[2], "id_pemilik": row[1]} for row in lahan_reader if len(row) >= 2}  # id_lahan -> {lokasi, id_pemilik}
 
