@@ -457,6 +457,9 @@ def data_perjanjian(user_id):
         nomor = int(pilihan) - 1
         buat_surat_perjanjian(data_sewa[nomor], user_id)
         print("Surat perjanjian berhasil dibuat dan disimpan sebagai PDF.")
+    elif pilihan == '0':
+        print("Pembuatan surat perjanjian dibatalkan.")
+        show_menu("pengguna", user_id)
     else:
         print("Pilihan tidak valid.")
     
@@ -529,7 +532,7 @@ def lihat_history(user_id):
         print("\n=== History Penyewaan ===")
         print(f"{'No.':<5}{'ID Sewa':<10}{'Status':<15}{'Tgl Sewa':<15}{'Tgl Selesai':<15}{'Harga':<10}")
         for i, row in enumerate(data_sewa, start=1):
-            print(f"{i:<5}{row[0]:<10}{row[7]:<15}{row[3]:<15}{row[4]:<15}Rp {float(row[6]):,.2f}")
+            print(f"{i:<5}{row[0]:<10}{row[7]:<20}{row[3]:<15}{row[4]:<15}Rp {float(row[6]):,.2f}")
 
         pilihan = input("\nMasukkan nomor untuk melihat detail (atau 0 untuk kembali): ")
         if pilihan == '0':
@@ -623,6 +626,12 @@ def tambah_lahan(user_id):
     deskripsi = input("Masukkan deskripsi lahan: ")
     luas = input("Masukkan luas tanah (dalam hektar): ")
     harga_per_hektar = input("Masukkan harga per hektar: ")
+    
+    if lokasi == "" or tanaman == "" or deskripsi == "" or luas == "" or harga_per_hektar == "":
+        print("Semua field harus diisi.")
+        input("\nTekan Enter untuk kembali.")
+        data_lahan(user_id)
+        return
 
     with open("lahan.csv", mode="a", newline='') as file:
         writer = csv.writer(file)
@@ -633,8 +642,8 @@ def tambah_lahan(user_id):
 
 def lihat_lahan(user_id):
     print("\n=== Daftar Lahan ===")
-    print(f"{'ID':<5} {'Lokasi':<15} {'Tanaman':<20} {'Luas':<10} {'Harga':<10}")
-    print("="*60)
+    print(f"{'ID':<5} {'Lokasi':<40} {'Tanaman':<20} {'Luas':<10} {'Harga':<10}")
+    print("="*85)
     lahan_ada = False
     
     try:
@@ -644,7 +653,7 @@ def lihat_lahan(user_id):
             for row in lahan_data:
                 if row[1] == user_id:
                     lahan_ada = True
-                    print(f"{row[0]:<5} {row[2]:<15} {row[3]:<20} {row[5]:<10} {row[6]:<10}")
+                    print(f"{row[0]:<5} {row[2]:<40} {row[3]:<20} {row[5]:<10} {row[6]:<10}")
     except FileNotFoundError:
         print("Belum ada data lahan.")
     
@@ -700,7 +709,6 @@ def list_penyewa(user_id):
                 print("Anda belum memiliki lahan terdaftar.")
                 return
             
-            
             sewa_terkait = []
             for sewa in sewa_reader:
                 for lahan in lahan_pemilik:
@@ -710,10 +718,12 @@ def list_penyewa(user_id):
 
             if not sewa_terkait:
                 print("Belum ada penyewa untuk lahan Anda.")
+                input("\nTekan Enter untuk kembali.")
+                show_menu("pemilik_lahan", user_id)
                 return
             
-            print(f"{'No':<5} {'ID Lahan':<10} {'Lokasi':<20} {'Nama Penyewa':<20} {'Status':<15}")
-            print("=" * 70)
+            print(f"{'No':<5} {'ID Lahan':<10} {'Lokasi':<40} {'Nama Penyewa':<20} {'Status':<15}")
+            print("=" * 90)
             penyewa_dict = {}
             
             for i, sewa in enumerate(sewa_terkait, start=1):
@@ -722,7 +732,7 @@ def list_penyewa(user_id):
                 penyewa = next((u for u in users_reader if u[0] == sewa[1]), None)
                 
                 penyewa_dict[str(i)] = (sewa, lahan, penyewa)
-                print(f"{i:<5} {lahan[0]:<10} {lahan[2]:<20} {penyewa[1]:<20} {sewa[7]:<15}")
+                print(f"{i:<5} {lahan[0]:<10} {lahan[2]:<40} {penyewa[1]:<20} {sewa[7]:<15}")
             
             pilihan = input("\nPilih nomor untuk melihat detail (0 untuk kembali): ")
             if pilihan == "0":
