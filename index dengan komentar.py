@@ -738,7 +738,7 @@ def hapus_lahan(user_id, lahan_data):
     input("\nTekan Enter untuk kembali.")
     lihat_lahan(user_id)
 
-# CHECKING SAMPAI SINI==========
+#MASUKIN SAMPAI SINI
 def list_penyewa(user_id):
     print("\n=== List Penyewa ===")
     try:
