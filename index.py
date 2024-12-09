@@ -264,7 +264,7 @@ def sewa_lahan(user_id):
     print("=" * 100)
 
     try:
-        with open("lahan.csv", mode="r") as file:
+        with open("lahan.csv", mode="r") as file:   
             reader = csv.reader(file)
             lahan_data = list(reader)
             nomor = 1
@@ -883,6 +883,7 @@ def tampilkan_detail(sewa, user_map, lahan_map):
         print(f"Status         : {status}")
         print("=" * 30)
 
+
     except Exception as e:
         print(f"Terjadi kesalahan saat menampilkan detail: {e}")
 
@@ -899,6 +900,7 @@ def rekap_jumlah_pengguna(user_id):
                 return  
 
             sewa_list = [row for row in sewa_reader if len(row) >= 2]
+            
             pengguna_menyewa = {sewa[1] for sewa in sewa_list}
 
             print("\n=== Rekap Jumlah Pengguna ===")
